@@ -20,8 +20,8 @@ class _ScoreState extends State<Score> {
   dynamic total;
   dynamic mount;
   dynamic object;
- var isLoading=true;
-  late DetailsOfScore scoreDetails ;
+  var isLoading = true;
+  late DetailsOfScore scoreDetails;
   late List<ListCustomerClubUserPoint> listDetails;
   late CustomerClubTypeOfPoint customerClubTypeOfPoint;
   @override
@@ -138,21 +138,27 @@ class _ScoreState extends State<Score> {
                             ],
                           ),
                           divider(),
-                          isLoading?Loading.circular():
-                          SizedBox(
-                            height: 180,
-                            child:ListView.builder(
-                                scrollDirection: Axis.vertical,
-                                itemCount: listOfLenght,
-                                itemBuilder: (BuildContext context, int index) {
-                                   object= listDetails.elementAt(index);
-                                  title = object.customerClubTypeOfPoint?.title;
-                                  mount = object.customerClubTypeOfPoint?.point;
-                                  total = object.customerClubTypeOfPoint?.point;
+                          isLoading
+                              ? Loading.circular()
+                              : SizedBox(
+                                  height: 180,
+                                  child: ListView.builder(
+                                      scrollDirection: Axis.vertical,
+                                      itemCount: listOfLenght,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        object = listDetails.elementAt(index);
+                                        title = object
+                                            .customerClubTypeOfPoint?.title;
+                                        mount = object
+                                            .customerClubTypeOfPoint?.point;
+                                        total = 1;
 
-                                  return row(title,mount,total);
-                                }),
-                          ),
+                                        return row(title,
+                                            listDetails[index].point, total);
+                                        // return row(title, mount, total);
+                                      }),
+                                ),
                         ],
                       )
                     ],
@@ -169,24 +175,26 @@ class _ScoreState extends State<Score> {
         height: 1,
         width: MediaQuery.of(context).size.width,
         margin: const EdgeInsets.symmetric(vertical: 10),
-       color: const Color(0xffDCDCDC)
-    );
+        color: const Color(0xffDCDCDC));
   }
 
-  Widget row(title,mount,total) {
+  Widget row(title, mount, total) {
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-          SizedBox(
-            width: 150,
-            child:   Text(title ?? '',
-                style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black)),
-          ),const SizedBox(width: 10,),
+            SizedBox(
+              width: 150,
+              child: Text(title ?? '',
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black)),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
             Container(
               padding: const EdgeInsets.only(left: 30),
               child: Text(mount.toString(),
@@ -194,7 +202,10 @@ class _ScoreState extends State<Score> {
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color: Colors.black)),
-            ),const SizedBox(width: 80,),
+            ),
+            const SizedBox(
+              width: 80,
+            ),
             Text(mount.toString(),
                 style: const TextStyle(
                     fontSize: 12,
@@ -208,8 +219,7 @@ class _ScoreState extends State<Score> {
   }
 
   getTotalScore() async {
-    var points = await ScoreService()
-        .setTotalUserScore(DataMemory.userId);
+    var points = await ScoreService().setTotalUserScore(DataMemory.userId);
     // var points = await ScoreService().setTotalUserScore(DataMemory.userId);
     if (!mounted) return;
     setState(() {
@@ -232,13 +242,14 @@ class _ScoreState extends State<Score> {
     // var response = await ScoreService()
     //     .setListOfUserScore("219657e3-be6e-4d2a-bea1-35732daef3d4");
     //  print(DataMemory.userId);
-    scoreDetails=response;
+    scoreDetails = response;
     listOfLenght = scoreDetails.result?.listCustomerClubUserPoint!.length;
-    listDetails= scoreDetails.result?.listCustomerClubUserPoint ?? [];
+    listDetails = scoreDetails.result?.listCustomerClubUserPoint ?? [];
+
     setState(() {
-      isLoading=false;
+      isLoading = false;
     });
-  /*  for (var i in listDetails) {
+    /*  for (var i in listDetails) {
       setState(() {
         title = i.customerClubTypeOfPoint?.title;
         mount = i.customerClubTypeOfPoint?.point;
@@ -249,6 +260,5 @@ class _ScoreState extends State<Score> {
       });
 
     }*/
-
   }
 }

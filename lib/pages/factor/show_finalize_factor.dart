@@ -1,11 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:gol_pouneh/models/survey.dart';
 import 'package:gol_pouneh/services/delivery.dart';
 import 'package:gol_pouneh/services/survey.dart';
 import 'package:gol_pouneh/shared/appbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../models/factor.dart';
 import '../../models/product.dart';
 import '../../models/result_operation.dart';
@@ -94,6 +94,12 @@ class _ShowDetailsFinalizeFactorState extends State<ShowDetailsFinalizeFactor> {
     getLastFromFinalizeFactor();
     comeFromFinalize = widget.comeFromFinalize;
     getSurvey();
+    initialPrefs();
+    getFactors();
+  }
+
+  void initialPrefs() async {
+    prefs = await SharedPreferences.getInstance();
   }
 
   void delivery() async {
@@ -464,10 +470,29 @@ class _ShowDetailsFinalizeFactorState extends State<ShowDetailsFinalizeFactor> {
                           rowFactorDetails("تخفیف",
                               '${toman(numberOfProductFactorList.first.SaleFactorDiscountAmmount)} تومان'),
                         rowFactorDetails(
-                            "قیمت کل", '${toman(myTotalPrice)} تومان'),
+                            "قیمت کل", '${toman(totalPrice)} تومان'),
                         if (widget.deliveryPrice != 0)
-                          rowFactorDetails("هزینه پیک",
-                              '${toman(widget.deliveryPrice)} تومان'),
+                          if (factors.isNotEmpty)
+                            if (factors.first.isConfirm == true)
+                              rowFactorDetails("هزینه پیک",
+                                  '${toman(widget.deliveryPrice)} تومان'),
+                        rowFactorDetails(
+                            "آدرس فرستنده",
+                            prefs!.getInt('supplierId1') == null
+                                ? DataMemory.supplierAddress
+                                : prefs!.getString('supplierAddress1')!),
+                        // if (DataMemory.activePayBtn)
+                        //   rowFactorDetails(
+                        //       "نحوه ارسال",
+                        //       (DataMemory.getWithUrSelf)
+                        //           ? 'با خودم میبرم'
+                        //           : 'برام بفرستید'),
+
+                        rowFactorDetails(
+                            "زمان تحویل",
+                            prefs?.get('delivery-time') == null
+                                ? '8 تا 12'
+                                : prefs!.getString('delivery-time')!),
                       ],
                     ),
               const SizedBox(height: 15),
@@ -659,9 +684,12 @@ class _ShowDetailsFinalizeFactorState extends State<ShowDetailsFinalizeFactor> {
                         child: Text(model.title ?? '',
                             style: const TextStyle(
                                 fontSize: 13, fontWeight: FontWeight.w900))),
-                    Html(
-                        data: model.intro ?? '',
-                        style: {'p': Style(fontSize: FontSize(13))}),
+                    // Html(
+                    //     data: model.intro ?? '',
+                    //     style: {'p': Style(fontSize: FontSize(13))}),
+                    SizedBox(
+                      height: 20,
+                    ),
                     SizedBox(
                         height: 35,
                         // margin: const EdgeInsets.only(right: 7.5),
@@ -867,6 +895,13 @@ class _ShowDetailsFinalizeFactorState extends State<ShowDetailsFinalizeFactor> {
     // }
   }
 
+  Future<void> getFactors() async {
+    List response = await FactorService().factorHistory();
+    setState(() {
+      factors = response[0];
+    });
+  }
+
   void getNumberOfProductFromFactor() async {
     setState(() {
       numberOfProductFactorLoading = true;
@@ -893,7 +928,17 @@ class _ShowDetailsFinalizeFactorState extends State<ShowDetailsFinalizeFactor> {
   Widget rowFactorDetails(subject, details) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [Text(subject), Text(details)],
+      children: [
+        Text(subject),
+        const SizedBox(width: 24),
+        Expanded(
+          child: Text(
+            details,
+            textAlign: TextAlign.end,
+            overflow: TextOverflow.ellipsis,
+          ),
+        )
+      ],
     );
   }
 

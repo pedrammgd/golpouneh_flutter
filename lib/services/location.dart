@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:gol_pouneh/models/company_model.dart';
 import 'package:gol_pouneh/shared/url.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,7 @@ class LocationService {
     var responseBody =
         json.decode(utf8convert(response.body))['Result']['result'];
     return (responseBody as List).map((data) {
+      // log(data.toString());
       return CompanyModel.fromJson(data);
     }).toList();
   }

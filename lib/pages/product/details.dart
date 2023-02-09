@@ -2,6 +2,8 @@ import 'package:antdesign_icons/antdesign_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:get/get.dart';
+import 'package:gol_pouneh/controller/delivery_price_controller/delivery_price_controller.dart';
 import 'package:gol_pouneh/models/product.dart';
 import 'package:gol_pouneh/models/result_operation.dart';
 import 'package:gol_pouneh/services/cart.dart';
@@ -16,22 +18,26 @@ import '../../shared/url.dart';
 class ProductDetails extends StatefulWidget {
   final ProductModel model;
   final bool fromFactor;
-  const ProductDetails(this.model, this.fromFactor, {Key? key}) : super(key: key);
+  const ProductDetails(this.model, this.fromFactor, {Key? key})
+      : super(key: key);
 
   @override
   State<ProductDetails> createState() => _ProductDetailsState();
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
+  final DeliveryPriceController deliveryPriceController =
+      Get.put(DeliveryPriceController());
   late ProductModel model;
   late bool fromFactor;
   bool isChanged = false;
   bool isLoading = false;
-  bool checkedOnce=false;
+  bool checkedOnce = false;
   @override
   void initState() {
     model = widget.model;
     fromFactor = widget.fromFactor;
+
     super.initState();
   }
 
@@ -40,26 +46,29 @@ class _ProductDetailsState extends State<ProductDetails> {
     return WillPopScope(
         child: Scaffold(
             body: RefreshIndicator(
-              child:  Container(
+              child: Container(
                 padding: const EdgeInsets.only(top: 20),
                 height: double.infinity,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
                       image: AssetImage("assets/images/banner.jpg"),
                       fit: BoxFit.cover),
-                ),child:  SingleChildScrollView(
-                  reverse: false,
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Stack(children: [
-                      topShape(), image(model)]),
-                    title(),
-                    intro(),
-                    descriptionTitle(),
-                    description()
-                  ])),),
-              onRefresh: ()async{
+                ),
+                child: SingleChildScrollView(
+                    reverse: false,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Stack(children: [topShape(), image(model)]),
+                          title(),
+                          intro(),
+                          descriptionTitle(),
+                          description()
+                        ])),
+              ),
+              onRefresh: () async {
                 setState(() {
-                  checkedOnce=false;
+                  checkedOnce = false;
                 });
                 checkNavigator(checkedOnce, context, () {
                   model = widget.model;
@@ -69,7 +78,6 @@ class _ProductDetailsState extends State<ProductDetails> {
             ),
             bottomNavigationBar: bottomSummary()),
         onWillPop: () async {
-
           Navigator.pop(context, isChanged);
           return Future.value(false);
           // return Navigator.maybePop(context, isChanged);
@@ -93,25 +101,32 @@ class _ProductDetailsState extends State<ProductDetails> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  model.price == model.saleOrderProductFinalPrice? price(
-                      'مجموع قیمت', toman(model.price!* model.orderProductCount!)):
-                  price(' مجموع قیمت تخفیف خورده', toman(model.saleOrderProductFinalPrice!* model.orderProductCount!)),
+                  model.price == model.saleOrderProductFinalPrice
+                      ? price('مجموع قیمت',
+                          toman(model.price! * model.orderProductCount!))
+                      : price(
+                          ' مجموع قیمت تخفیف خورده',
+                          toman(model.saleOrderProductFinalPrice! *
+                              model.orderProductCount!)),
                   SizedBox(
                       width: 100,
                       child: Text(model.orderProductCount.toString(),
-                          style:
-                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)))
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)))
                 ]),
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                 priceWithoutDiscount('قیمت واحد', toman(model.price!)),
-                  model.price == model.saleOrderProductFinalPrice? const SizedBox(): priceWithoutDiscount(' قیمت واحد تخفیف خورده', toman(model.saleOrderProductFinalPrice!)),
+                  priceWithoutDiscount('قیمت واحد', toman(model.price!)),
+                  model.price == model.saleOrderProductFinalPrice
+                      ? const SizedBox()
+                      : priceWithoutDiscount(' قیمت واحد تخفیف خورده',
+                          toman(model.saleOrderProductFinalPrice!)),
                   isLoading
                       ? Padding(
-                      padding: const EdgeInsets.only(left: 22),
-                      child: Loading.circular())
+                          padding: const EdgeInsets.only(left: 22),
+                          child: Loading.circular())
                       : addToCart()
                 ])
           ]));
@@ -128,88 +143,96 @@ class _ProductDetailsState extends State<ProductDetails> {
           padding: const EdgeInsets.only(left: 27, right: 27, top: 10),
           child: model.orderProductCount! > 0
               ? Column(children: [
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  model.price == model.saleOrderProductFinalPrice? price(
-                      'مجموع قیمت', toman(model.price!* model.orderProductCount!)):
-                  price(' مجموع قیمت تخفیف خورده', toman(model.saleOrderProductFinalPrice!* model.orderProductCount!)),
-                  SizedBox(
-                      width: 100,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            plusOne(),
-                            Text(model.orderProductCount.toString(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16)),
-                            minusOne()
-                          ]))
-                ]),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  model.price == model.saleOrderProductFinalPrice? price('قیمت واحد', toman(model.price!)):
-                      price(' قیمت واحد تخفیف خورده', toman(model.saleOrderProductFinalPrice!)),
-                  isLoading
-                      ? Padding(
-                      padding: const EdgeInsets.only(left: 22),
-                      child: Loading.circular())
-                      : removeFromCart()
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        model.price == model.saleOrderProductFinalPrice
+                            ? price('مجموع قیمت',
+                                toman(model.price! * model.orderProductCount!))
+                            : price(
+                                ' مجموع قیمت تخفیف خورده',
+                                toman(model.saleOrderProductFinalPrice! *
+                                    model.orderProductCount!)),
+                        SizedBox(
+                            width: 100,
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  plusOne(),
+                                  Text(model.orderProductCount.toString(),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16)),
+                                  minusOne()
+                                ]))
+                      ]),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        model.price == model.saleOrderProductFinalPrice
+                            ? price('قیمت واحد', toman(model.price!))
+                            : price(' قیمت واحد تخفیف خورده',
+                                toman(model.saleOrderProductFinalPrice!)),
+                        isLoading
+                            ? Padding(
+                                padding: const EdgeInsets.only(left: 22),
+                                child: Loading.circular())
+                            : removeFromCart()
+                      ])
                 ])
-          ])
               : Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-
-                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    model.price == model.saleOrderProductFinalPrice?  Text('${toman(model.price!)} قیمت واحد',):
-                    Text('${toman(model.price!)} قیمت واحد',
-                style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.red,
-                    decoration: TextDecoration.lineThrough)),
-                    model.price == model.saleOrderProductFinalPrice? const SizedBox():
-                    Text('${toman(model.saleOrderProductFinalPrice!)}  قیمت واحد تخفیف خورده',)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          model.price == model.saleOrderProductFinalPrice
+                              ? Text(
+                                  '${toman(model.price!)} قیمت واحد',
+                                )
+                              : Text('${toman(model.price!)} قیمت واحد',
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.red,
+                                      decoration: TextDecoration.lineThrough)),
+                          model.price == model.saleOrderProductFinalPrice
+                              ? const SizedBox()
+                              : Text(
+                                  '${toman(model.saleOrderProductFinalPrice!)}  قیمت واحد تخفیف خورده',
+                                )
+                        ],
+                      ),
+                      // Container(
+                      //     width: MediaQuery.of(context).size.width,
+                      //     padding: const EdgeInsets.only(left: 3, top: 2),
+                      //     alignment: Alignment.centerLeft,
+                      //     child: model.price == model.saleOrderProductFinalPrice
+                      //         ? Text('${toman(model.price!)} تومان',
+                      //         style: const TextStyle(fontSize: 13))
+                      //         : Row(
+                      //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //       children: [
+                      //         Text('${toman(model.price!)} تومان',
+                      //             style: const TextStyle(
+                      //                 fontSize: 13,
+                      //                 color: Colors.red,
+                      //                 decoration: TextDecoration.lineThrough)),
+                      //         Text('${toman(model.saleOrderProductFinalPrice!)} تومان',
+                      //             style: const TextStyle(fontSize: 13)),
+                      //       ],
+                      //     )),
 
-                  ],
-                ),
-                // Container(
-                //     width: MediaQuery.of(context).size.width,
-                //     padding: const EdgeInsets.only(left: 3, top: 2),
-                //     alignment: Alignment.centerLeft,
-                //     child: model.price == model.saleOrderProductFinalPrice
-                //         ? Text('${toman(model.price!)} تومان',
-                //         style: const TextStyle(fontSize: 13))
-                //         : Row(
-                //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //       children: [
-                //         Text('${toman(model.price!)} تومان',
-                //             style: const TextStyle(
-                //                 fontSize: 13,
-                //                 color: Colors.red,
-                //                 decoration: TextDecoration.lineThrough)),
-                //         Text('${toman(model.saleOrderProductFinalPrice!)} تومان',
-                //             style: const TextStyle(fontSize: 13)),
-                //       ],
-                //     )),
-
-
-
-
-
-                isLoading
-                    ? Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Loading.circular())
-                    : addToCart()
-              ]));
+                      isLoading
+                          ? Padding(
+                              padding: const EdgeInsets.only(left: 22),
+                              child: Loading.circular())
+                          : addToCart()
+                    ]));
     }
   }
 
@@ -220,23 +243,27 @@ class _ProductDetailsState extends State<ProductDetails> {
             height: 32,
             alignment: Alignment.center,
             decoration: const BoxDecoration(
-                color: Colors.red, borderRadius: BorderRadius.all(Radius.circular(55))),
+                color: Colors.red,
+                borderRadius: BorderRadius.all(Radius.circular(55))),
             child: const Icon(Icons.remove, size: 20, color: Colors.white)),
         onTap: () async {
           setState(() {
             model.orderProductCount = model.orderProductCount! - 1;
+
             isLoading = true;
           });
           ResultOperation result =
-          await CartService().editCart(model.id!, model.orderProductCount!);
+              await CartService().editCart(model.id!, model.orderProductCount!);
           if (!mounted) return;
           if (result.isSuccess == true) {
+            deliveryPriceController.totalPrice.value -= model.price!;
             // toastDanger(model.title!, 'از سبد خرید کسر گردید', context);
             // setState(() {
             //   totalPrice -= model.price!;
             // });
           } else {
-            toastFail(model.title ?? '', 'خطا در ارسال اطلاعات به سرور', context);
+            toastFail(
+                model.title ?? '', 'خطا در ارسال اطلاعات به سرور', context);
             model.orderProductCount = model.orderProductCount! + 1;
           }
           setState(() {
@@ -257,23 +284,27 @@ class _ProductDetailsState extends State<ProductDetails> {
             height: 32,
             alignment: Alignment.center,
             decoration: const BoxDecoration(
-                color: mainColor, borderRadius: BorderRadius.all(Radius.circular(55))),
+                color: mainColor,
+                borderRadius: BorderRadius.all(Radius.circular(55))),
             child: const Icon(Icons.add, size: 20, color: Colors.white)),
         onTap: () async {
           setState(() {
             model.orderProductCount = model.orderProductCount! + 1;
+
             isLoading = true;
           });
           ResultOperation result =
-          await CartService().editCart(model.id!, model.orderProductCount!);
+              await CartService().editCart(model.id!, model.orderProductCount!);
           if (!mounted) return;
           if (result.isSuccess == true) {
+            deliveryPriceController.totalPrice.value += model.price!;
             // toastSuccess(model.title!, 'به سبد خرید اضافه گردید', context);
             // setState(() {
             //   totalPrice += model.price!;
             // });
           } else {
-            toastFail(model.title ?? '', 'خطا در ارسال اطلاعات به سرور', context);
+            toastFail(
+                model.title ?? '', 'خطا در ارسال اطلاعات به سرور', context);
             model.orderProductCount = model.orderProductCount! - 1;
           }
           setState(() {
@@ -287,7 +318,8 @@ class _ProductDetailsState extends State<ProductDetails> {
         style: ElevatedButton.styleFrom(
             fixedSize: const Size(120, 48),
             backgroundColor: mainColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
         onPressed: () async {
           setState(() {
             isLoading = true;
@@ -297,10 +329,12 @@ class _ProductDetailsState extends State<ProductDetails> {
           if (result.isSuccess == true) {
             setState(() {
               model.orderProductCount = 1;
+              deliveryPriceController.totalPrice.value += model.price!;
               isChanged = true;
             });
           } else {
-            toastFail(model.title ?? '', 'خطا در ارسال اطلاعات به سرور', context);
+            toastFail(
+                model.title ?? '', 'خطا در ارسال اطلاعات به سرور', context);
           }
           setState(() {
             isLoading = false;
@@ -308,7 +342,9 @@ class _ProductDetailsState extends State<ProductDetails> {
         },
         child: Text(fromFactor ? 'سفارش مجدد' : 'افزودن به سبد',
             style: const TextStyle(
-                color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)));
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold)));
   }
 
   Widget removeFromCart() {
@@ -316,7 +352,8 @@ class _ProductDetailsState extends State<ProductDetails> {
         style: ElevatedButton.styleFrom(
             fixedSize: const Size(100, 48),
             backgroundColor: Colors.red,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
         onPressed: () async {
           setState(() {
             isLoading = true;
@@ -325,12 +362,17 @@ class _ProductDetailsState extends State<ProductDetails> {
           if (!mounted) return;
           if (result.isSuccess == true) {
             // toastSuccess(model.title!, 'از سبد خرید حذف گردید', context);
+            print(model.orderProductCount);
+
+            deliveryPriceController.totalPrice.value -=
+                (model.price! * model.orderProductCount!);
             setState(() {
               model.orderProductCount = 0;
               isChanged = true;
             });
           } else {
-            toastFail(model.title ?? '', 'خطا در ارسال اطلاعات به سرور', context);
+            toastFail(
+                model.title ?? '', 'خطا در ارسال اطلاعات به سرور', context);
           }
           setState(() {
             isLoading = false;
@@ -338,7 +380,9 @@ class _ProductDetailsState extends State<ProductDetails> {
         },
         child: const Text('حذف از سبد',
             style: TextStyle(
-                color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)));
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold)));
   }
 
   Widget price(String text, String value) {
@@ -348,28 +392,39 @@ class _ProductDetailsState extends State<ProductDetails> {
         children: [
           Text(text,
               style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 15, color: Colors.grey)),
-            Row(children: [
-            const Text('تومان ', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.grey)),
+          Row(children: [
+            const Text('تومان ',
+                style: TextStyle(fontSize: 13, color: Colors.black54)),
             Text(value,
                 style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black))
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.black))
           ])
         ]);
   }
+
   Widget priceWithoutDiscount(String text, String value) {
     return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-        Text(text,
+          Text(text,
               style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 15, color: Colors.grey)),
-            Row(children: [
-            const Text('تومان ', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.grey)),
+          Row(children: [
+            const Text('تومان ',
+                style: TextStyle(fontSize: 13, color: Colors.black54)),
             Text(value,
                 style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black))
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.black))
           ])
         ]);
   }
@@ -379,7 +434,7 @@ class _ProductDetailsState extends State<ProductDetails> {
         margin: const EdgeInsets.only(top: 8, right: 27, left: 30, bottom: 30),
         child: Html(
             data: model.description ?? '',
-            style: {'p': Style(fontSize:  FontSize(13.5))}));
+            style: {'p': Style(fontSize: FontSize(13.5))}));
   }
 
   Widget descriptionTitle() {
@@ -393,7 +448,8 @@ class _ProductDetailsState extends State<ProductDetails> {
     return Padding(
         padding: const EdgeInsets.only(right: 28, top: 7),
         child: Html(
-            data: model.intro ?? '', style: {'p': Style(fontSize:  FontSize(13))}));
+            data: model.intro ?? '',
+            style: {'p': Style(fontSize: FontSize(13))}));
   }
 
   Widget title() {
@@ -407,18 +463,22 @@ class _ProductDetailsState extends State<ProductDetails> {
     return Container(
         margin: const EdgeInsets.only(top: 140),
         alignment: Alignment.topCenter,
-        child:model.imgUrl==null?Image.asset("assets/images/icon.png"):CachedNetworkImage(
-            width: 310,
-            height: 200,
-            imageUrl: newImageUrl + model.imgUrl!,
-            imageBuilder: (context, imageProvider) => Container(
-                decoration: BoxDecoration(
-                    image: DecorationImage(image: imageProvider, fit: BoxFit.contain))),
-            placeholder: (context, url) =>
-                SizedBox(width: 310, height: 200, child: Loading.circular(mainColor)),
-            errorWidget: (context, url, error) =>
-            const SizedBox(width: 310, height: 200))
-    );
+        child: model.imgUrl == null
+            ? Image.asset("assets/images/icon.png")
+            : CachedNetworkImage(
+                width: 310,
+                height: 200,
+                imageUrl: newImageUrl + model.imgUrl!,
+                imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: imageProvider, fit: BoxFit.contain))),
+                placeholder: (context, url) => SizedBox(
+                    width: 310,
+                    height: 200,
+                    child: Loading.circular(mainColor)),
+                errorWidget: (context, url, error) =>
+                    const SizedBox(width: 310, height: 200)));
   }
 
   Widget topShape() {
@@ -438,8 +498,10 @@ class _ProductDetailsState extends State<ProductDetails> {
                         height: 50,
                         decoration: const BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(10))),
-                        child: const Icon(AntIcons.arrowRightOutlined, color: mainColor)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                        child: const Icon(AntIcons.arrowRightOutlined,
+                            color: mainColor)),
                     onTap: () {
                       Navigator.pop(context);
                     }),
@@ -451,8 +513,10 @@ class _ProductDetailsState extends State<ProductDetails> {
                         height: 50,
                         decoration: const BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(10))),
-                        child: const Icon(AntIcons.shareAltOutlined, color: mainColor)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                        child: const Icon(AntIcons.shareAltOutlined,
+                            color: mainColor)),
                     onTap: () {
                       Share.share(
                           'این محصول رو در گل پونه ببین  \nhttp://golpouneh.com/Product/${model.id}/',

@@ -7,6 +7,7 @@ import 'package:gol_pouneh/shared/data_memory.dart';
 import 'package:gol_pouneh/shared/toast.dart';
 import 'package:gol_pouneh/shared/url.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DeliveryTime extends StatefulWidget {
   const DeliveryTime({Key? key}) : super(key: key);
@@ -19,7 +20,13 @@ class _DeliveryTimeState extends State<DeliveryTime> {
   @override
   void initState() {
     changeTime("4:00:00 PM", firstTime: true);
+    initPrefs();
     super.initState();
+  }
+
+  late SharedPreferences prefs;
+  void initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
   }
 
   List daysOfWeekList = ['امروز', 'فردا'];
@@ -127,6 +134,8 @@ class _DeliveryTimeState extends State<DeliveryTime> {
                                   setState(() {
                                     deliveryPeriod = 1;
                                     changeTime("12:00:00 PM");
+                                    prefs.setString(
+                                        'delivery-time', ' 8 تا 12');
                                   });
                                 },
                               ),
@@ -147,6 +156,8 @@ class _DeliveryTimeState extends State<DeliveryTime> {
                                   setState(() {
                                     deliveryPeriod = 2;
                                     changeTime("4:00:00 PM");
+                                    prefs.setString(
+                                        'delivery-time', ' 12 تا 16');
                                   });
                                 },
                               ),
@@ -167,6 +178,8 @@ class _DeliveryTimeState extends State<DeliveryTime> {
                                   setState(() {
                                     deliveryPeriod = 3;
                                     changeTime("8:00:00 PM");
+                                    prefs.setString(
+                                        'delivery-time', ' 16 تا 20');
                                   });
                                 },
                               ),

@@ -65,12 +65,13 @@ class FinalizeOrderState extends State<FinalizeOrder>
   String? userLatitude;
   String? userLongitude;
   double deliveryPrice = 0;
-
+  List<CompanyModel> companyList = [];
   late List<ProductModel> cartProducts;
 
   @override
   void initState() {
     super.initState();
+    DataMemory.activePayBtn = false;
     WidgetsBinding.instance.addObserver(this);
     firstNameController = TextEditingController(text: "");
     lastNameController = TextEditingController(text: "");
@@ -110,7 +111,7 @@ class FinalizeOrderState extends State<FinalizeOrder>
 
   void getData() async {
     WidgetsBinding.instance.addObserver(this);
-
+    showPay = false;
     prefs = await SharedPreferences.getInstance();
 
     if (prefs!.getInt('supplierId1') == null) {
@@ -152,6 +153,11 @@ class FinalizeOrderState extends State<FinalizeOrder>
     isInIndustrialTown();
     print(isInIndustrialTown());
     delivery();
+    // getListOfCompany().then((value) {
+    //   if (companyList.isNotEmpty) {
+    //     changeCompanyAddressAutoByUser();
+    //   }
+    // });
   }
 
   void delivery() async {
@@ -190,13 +196,7 @@ class FinalizeOrderState extends State<FinalizeOrder>
       double.tryParse(userLatitude ?? '0') ?? 0,
       double.tryParse(userLongitude ?? '0') ?? 0,
     );
-    // setState(() {});
-    // print('1-${shopLatitude}');
-    // print('2-${shopLongitude}');
-    // print('3-${userLatitude}');
-    // print('4-${userLongitude}');
-    // print('distanceInMeters ${distanceInMeters}');
-    if (distanceInMeters > 7000) {
+    if (distanceInMeters > 10000) {
       return false;
     } else {
       return true;
@@ -217,6 +217,32 @@ class FinalizeOrderState extends State<FinalizeOrder>
     setState(() {
       isLoading = false;
     });
+  }
+
+  void changeCompanyAddressAutoByUser() {
+    for (var element in companyList) {
+      var distanceInMeters = Geolocator.distanceBetween(
+        double.tryParse(userLatitude ?? '0') ?? 0,
+        double.tryParse(userLongitude ?? '0') ?? 0,
+        double.parse(element.Latitude ?? '0'),
+        double.parse(element.Longitude ?? '0'),
+      );
+      if (distanceInMeters < 10000) {
+        print(element.companyName);
+        print('first$distanceInMeters');
+      } else {
+        print('second$distanceInMeters');
+      }
+    }
+  }
+
+  Future<void> getListOfCompany() async {
+    companyList = await LocationService().setCompany(10, 1);
+    companyList.sort(
+      (a, b) {
+        return a.sortId!.compareTo(b.sortId!);
+      },
+    );
   }
 
   @override
@@ -477,13 +503,28 @@ class FinalizeOrderState extends State<FinalizeOrder>
                                   'latAddress1', shopLatitude ?? '');
                               prefs?.setString(
                                   'longAddress1', shopLongitude ?? '');
-                              toastFail("آدرس فروشنده به کارخانه تغییر کرد", "",
+                              toastSuccess(
+                                  "با توجه به موقعیت شما فروشنده  مرسوله را از کارخانه ارسال میکند",
+                                  "",
                                   context);
+                              setState(() {
+                                showPay = true;
+                              });
+                            } else {
+                              if (supplierId1 == 32) {
+                                toastSuccess(
+                                    "با توجه به موقعیت شما فروشنده امکان دریافت محصول از کارخانه را ندارید",
+                                    "",
+                                    context);
+                                setState(() {
+                                  showPay = false;
+                                });
+                              } else {
+                                setState(() {
+                                  showPay = true;
+                                });
+                              }
                             }
-
-                            setState(() {
-                              showPay = true;
-                            });
                           }
                         } else {
                           toastFail("تا کنون آدرسی ثبت نکردید", "", context);

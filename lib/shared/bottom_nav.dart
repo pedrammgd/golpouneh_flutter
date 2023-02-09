@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:antdesign_icons/antdesign_icons.dart';
 import 'package:badges/badges.dart' as badge;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gol_pouneh/controller/delivery_price_controller/delivery_price_controller.dart';
 import 'package:gol_pouneh/models/address.dart';
 import 'package:gol_pouneh/models/blog_article.dart';
@@ -32,12 +34,13 @@ import 'package:gol_pouneh/pages/shop/success_payment.dart';
 import 'package:gol_pouneh/pages/supplier/location.dart';
 import 'package:gol_pouneh/pages/terms/terms.dart';
 import 'package:gol_pouneh/shared/color.dart';
-import 'package:gol_pouneh/shared/loading.dart';
+import 'package:gol_pouneh/shared/converter.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+
 import '../models/product.dart';
 import '../pages/address/index.dart';
 import '../services/cart.dart';
-import 'package:get/get.dart';
+import '../services/factor.dart';
 
 class BottomNav extends StatefulWidget {
   final int selectedIndex;
@@ -55,8 +58,8 @@ class _BottomNavState extends State<BottomNav> {
 
   late int selectedIndex;
   late bool isLoading = true;
-  late int numberOfCart;
-
+  int? numberOfCart;
+  List<FactorModel> factors = [];
   late final String result;
   late final FactorModel factorModel;
   late final bool fromFactor;
@@ -112,6 +115,7 @@ class _BottomNavState extends State<BottomNav> {
     ];
     super.initState();
     getData();
+    getFactors();
   }
 
   void getData() async {
@@ -119,6 +123,14 @@ class _BottomNavState extends State<BottomNav> {
     setState(() {
       numberOfCart = numberOfOrders.length;
       isLoading = false;
+    });
+  }
+
+  Future<void> getFactors() async {
+    List response = await FactorService().factorHistory();
+    setState(() {
+      factors = response[0];
+      print(factors);
     });
   }
 
@@ -177,43 +189,68 @@ class _BottomNavState extends State<BottomNav> {
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (deliveryPriceController.totalPrice.value < 300000)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            // color: Colors.green,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(12),
-                                topRight: Radius.circular(12))),
-                        // height: 100,
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 10,
+                  if (deliveryPriceController.totalPrice.value != 0)
+                    if (factors.isNotEmpty)
+                      if (factors.first.isConfirm == true)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                                // color: Colors.green,
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(12),
+                                    topRight: Radius.circular(12))),
+                            // height: 100,
+                            child: Column(
+                              children: [
+                                if (deliveryPriceController.totalPrice.value <
+                                    300000) ...[
+                                  const SizedBox(
+                                    height: 2,
+                                  ),
+                                  const Text(
+                                    '  ارسال رایگان با خرید بیش از 300 هزار تومان',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  Text(
+                                    '${toman(300000 - deliveryPriceController.totalPrice.value)} تومان تا ارسال رایگان ',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(
+                                    height: 12,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: LinearProgressIndicator(
+                                      value: deliveryPriceController
+                                              .totalPrice.value /
+                                          300000,
+                                      minHeight: 5,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                ] else ...[
+                                  const Text(
+                                    'تبریک ارسال شما رایگان می باشد',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                ],
+                              ],
                             ),
-                            Text(
-                              '${deliveryPriceController.totalPrice.value}  ارسال رایگان با خرید بیش از 300 هزار تومان',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: LinearProgressIndicator(
-                                value: .5,
-                                minHeight: 5,
-                              ),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
                   Container(
                       color: backgroundColor,
                       child: SafeArea(
@@ -249,11 +286,13 @@ class _BottomNavState extends State<BottomNav> {
                                           position:
                                               badge.BadgePosition.topStart(
                                                   top: -16),
-                                          badgeContent: Text(
-                                            numberOfCart.toString(),
-                                            style: const TextStyle(
-                                                color: Colors.white),
-                                          ),
+                                          badgeContent: numberOfCart == null
+                                              ? SizedBox()
+                                              : Text(
+                                                  numberOfCart.toString(),
+                                                  style: const TextStyle(
+                                                      color: Colors.white),
+                                                ),
                                           child: Icon(
                                             AntIcons.shoppingCartOutlined,
                                             color: selectedIndex == 2
@@ -268,6 +307,7 @@ class _BottomNavState extends State<BottomNav> {
                                   ],
                                   selectedIndex: selectedIndex,
                                   onTabChange: (index) async {
+                                    getFactors();
                                     numberOfOrders =
                                         await CartService().cartProducts();
 

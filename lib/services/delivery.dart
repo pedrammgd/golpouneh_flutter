@@ -16,7 +16,6 @@ class DeliveryService {
       'totalPrice': totalPrice,
       'saleDeliveryPriceItem': saleDeliveryPriceItem,
     });
-    debugPrint(utf8convert(response.body));
     Delivery resultOperation =
         Delivery.fromJson(jsonDecode((utf8convert(response.body))));
     return resultOperation;

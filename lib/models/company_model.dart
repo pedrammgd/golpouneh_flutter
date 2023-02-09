@@ -84,6 +84,7 @@ class CompanyModel {
     String? geoLocation,
     dynamic Latitude,
     dynamic Longitude,
+    int? sortId,
   }) {
     _userIdentityId = userIdentityId;
     _userIdentity = userIdentity;
@@ -125,6 +126,7 @@ class CompanyModel {
     _geoLocation = geoLocation;
     _Latitude = Latitude;
     _Longitude = Longitude;
+    _sortId = sortId;
   }
 
   CompanyModel.fromJson(dynamic json) {
@@ -168,6 +170,7 @@ class CompanyModel {
     _id = json['Id'];
     _Latitude = json['Latitude'];
     _Longitude = json['Longitude'];
+    _sortId = json['SortId'];
     _resultStatusOperation = json['ResultStatusOperation'] != null
         ? ResultStatusOperation.fromJson(json['ResultStatusOperation'])
         : null;
@@ -212,6 +215,7 @@ class CompanyModel {
   String? _geoLocation;
   dynamic _Latitude;
   dynamic _Longitude;
+  int? _sortId;
 
   CompanyModel copyWith({
     String? userIdentityId,
@@ -254,49 +258,51 @@ class CompanyModel {
     String? geoLocation,
     dynamic Latitude,
     dynamic Longitude,
+    int? sortId,
   }) =>
       CompanyModel(
-        userIdentityId: userIdentityId ?? _userIdentityId,
-        userIdentity: userIdentity ?? _userIdentity,
-        applicationUserId: applicationUserId ?? _applicationUserId,
-        parentId: parentId ?? _parentId,
-        parent: parent ?? _parent,
-        cityId: cityId ?? _cityId,
-        city: city ?? _city,
-        supplierCode: supplierCode ?? _supplierCode,
-        economicCode: economicCode ?? _economicCode,
-        nationalCode: nationalCode ?? _nationalCode,
-        companyName: companyName ?? _companyName,
-        brand: brand ?? _brand,
-        typeCopmany: typeCopmany ?? _typeCopmany,
-        phoneNumber: phoneNumber ?? _phoneNumber,
-        faxNumber: faxNumber ?? _faxNumber,
-        address: address ?? _address,
-        website: website ?? _website,
-        registrationNumber: registrationNumber ?? _registrationNumber,
-        postalCode: postalCode ?? _postalCode,
-        phoneNumbers: phoneNumbers ?? _phoneNumbers,
-        personnelCount: personnelCount ?? _personnelCount,
-        emails: emails ?? _emails,
-        cRMCompanyStatus: cRMCompanyStatus ?? _cRMCompanyStatus,
-        salary: salary ?? _salary,
-        description: description ?? _description,
-        telegram: telegram ?? _telegram,
-        whatsApp: whatsApp ?? _whatsApp,
-        instagram: instagram ?? _instagram,
-        rate: rate ?? _rate,
-        attractive: attractive ?? _attractive,
-        isBlack: isBlack ?? _isBlack,
-        registerDate: registerDate ?? _registerDate,
-        isAccept: isAccept ?? _isAccept,
-        isVisible: isVisible ?? _isVisible,
-        isDelete: isDelete ?? _isDelete,
-        id: id ?? _id,
-        resultStatusOperation: resultStatusOperation ?? _resultStatusOperation,
-        geoLocation: geoLocation ?? _geoLocation,
-        Latitude: Latitude ?? _Latitude,
-        Longitude: Longitude ?? _Longitude,
-      );
+          userIdentityId: userIdentityId ?? _userIdentityId,
+          userIdentity: userIdentity ?? _userIdentity,
+          applicationUserId: applicationUserId ?? _applicationUserId,
+          parentId: parentId ?? _parentId,
+          parent: parent ?? _parent,
+          cityId: cityId ?? _cityId,
+          city: city ?? _city,
+          supplierCode: supplierCode ?? _supplierCode,
+          economicCode: economicCode ?? _economicCode,
+          nationalCode: nationalCode ?? _nationalCode,
+          companyName: companyName ?? _companyName,
+          brand: brand ?? _brand,
+          typeCopmany: typeCopmany ?? _typeCopmany,
+          phoneNumber: phoneNumber ?? _phoneNumber,
+          faxNumber: faxNumber ?? _faxNumber,
+          address: address ?? _address,
+          website: website ?? _website,
+          registrationNumber: registrationNumber ?? _registrationNumber,
+          postalCode: postalCode ?? _postalCode,
+          phoneNumbers: phoneNumbers ?? _phoneNumbers,
+          personnelCount: personnelCount ?? _personnelCount,
+          emails: emails ?? _emails,
+          cRMCompanyStatus: cRMCompanyStatus ?? _cRMCompanyStatus,
+          salary: salary ?? _salary,
+          description: description ?? _description,
+          telegram: telegram ?? _telegram,
+          whatsApp: whatsApp ?? _whatsApp,
+          instagram: instagram ?? _instagram,
+          rate: rate ?? _rate,
+          attractive: attractive ?? _attractive,
+          isBlack: isBlack ?? _isBlack,
+          registerDate: registerDate ?? _registerDate,
+          isAccept: isAccept ?? _isAccept,
+          isVisible: isVisible ?? _isVisible,
+          isDelete: isDelete ?? _isDelete,
+          id: id ?? _id,
+          resultStatusOperation:
+              resultStatusOperation ?? _resultStatusOperation,
+          geoLocation: geoLocation ?? _geoLocation,
+          Latitude: Latitude ?? _Latitude,
+          Longitude: Longitude ?? _Longitude,
+          sortId: sortId ?? _sortId);
   String? get userIdentityId => _userIdentityId;
   UserIdentity? get userIdentity => _userIdentity;
   dynamic get applicationUserId => _applicationUserId;
@@ -337,6 +343,7 @@ class CompanyModel {
   String? get geoLocation => _geoLocation;
   dynamic get Latitude => _Latitude;
   dynamic get Longitude => _Longitude;
+  int? get sortId => _sortId;
 
   set setGeo(String value) => _geoLocation = value;
 
@@ -383,6 +390,7 @@ class CompanyModel {
     map['IsDelete'] = _isDelete;
     map['Latitude'] = _Latitude;
     map['Longitude'] = _Longitude;
+    map['SortId'] = _sortId;
     map['Id'] = _id;
     if (_resultStatusOperation != null) {
       map['ResultStatusOperation'] = _resultStatusOperation?.toJson();

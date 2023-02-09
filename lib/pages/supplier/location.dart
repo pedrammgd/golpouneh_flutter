@@ -485,6 +485,11 @@ class _SuppliersLocationState extends State<SuppliersLocation>
 
   getListOfCompany() async {
     response = await LocationService().setCompany(10, 1);
+    response.sort(
+      (a, b) {
+        return a.sortId!.compareTo(b.sortId!);
+      },
+    );
     tabs = response.where((x) => x.cityId != null).toList();
 
     if (tabs.isNotEmpty) {
@@ -494,11 +499,11 @@ class _SuppliersLocationState extends State<SuppliersLocation>
         var obj3 = cityState1["Title"].toString();
         tabs2.add(obj3);
       }
-      uniquelist = tabs2;
+      uniquelist = tabs2.toSet().toList();
     }
     List temp = [
-      uniquelist[1],
       uniquelist[0],
+      uniquelist[1],
       uniquelist[2],
     ];
     uniquelist.clear();

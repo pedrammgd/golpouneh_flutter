@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:gol_pouneh/controller/delivery_price_controller/delivery_price_controller.dart';
 import 'package:gol_pouneh/models/category.dart';
 import 'package:gol_pouneh/services/category.dart';
 import 'package:gol_pouneh/shared/bottom_nav.dart';
@@ -28,6 +30,8 @@ class ProductIndex extends StatefulWidget {
 
 class _ProductIndexState extends State<ProductIndex>
     with SingleTickerProviderStateMixin {
+  final DeliveryPriceController deliveryPriceController =
+      Get.put(DeliveryPriceController());
   int? index;
   CategoryModel? model;
   List tabs = [];
@@ -184,13 +188,17 @@ class _ProductIndexState extends State<ProductIndex>
                                                   width: MediaQuery.of(context)
                                                       .size
                                                       .width,
+                                                  // height: MediaQuery.of(context)
+                                                  //         .size
+                                                  //         .height -
+                                                  //     100,
                                                   height: MediaQuery.of(context)
                                                           .size
                                                           .height -
                                                       (MediaQuery.of(context)
                                                               .size
                                                               .width /
-                                                          5) -
+                                                          2) -
                                                       (tab.id != null &&
                                                               DataMemory
                                                                   .categories
@@ -531,6 +539,10 @@ class _ProductIndexState extends State<ProductIndex>
                                                             setState(() {
                                                               model.orderProductCount =
                                                                   1;
+                                                              deliveryPriceController
+                                                                      .totalPrice
+                                                                      .value +=
+                                                                  model.price!;
                                                             });
                                                           } else {
                                                             toastFail(
@@ -587,6 +599,7 @@ class _ProductIndexState extends State<ProductIndex>
         onTap: () async {
           setState(() {
             model.orderProductCount = model.orderProductCount! - 1;
+
             // isLoading = true;
           });
           debugPrint(model.orderProductCount.toString());
@@ -598,6 +611,7 @@ class _ProductIndexState extends State<ProductIndex>
             // setState(() {
             //   totalPrice -= model.price!;
             // });
+            deliveryPriceController.totalPrice.value -= model.price!;
           } else {
             toastFail(
                 model.title ?? '', 'خطا در ارسال اطلاعات به سرور', context);
@@ -633,6 +647,7 @@ class _ProductIndexState extends State<ProductIndex>
               await CartService().editCart(model.id!, model.orderProductCount!);
           if (!mounted) return;
           if (result.isSuccess == true) {
+            deliveryPriceController.totalPrice.value += model.price!;
             //  toastSuccess(model.title!, 'به سبد خرید اضافه گردید', context);
             // setState(() {
             //   totalPrice += model.price!;
